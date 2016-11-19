@@ -106,7 +106,7 @@ public:
       _head->_prev->_next = newNode;
       _head->_prev = newNode;
 
-      if (newNode->_prev != _head) _isSorted = false;
+      _isSorted = false;
    }
    void pop_front() {
       DListNode<T>* cpHead = _head->_next;
@@ -114,8 +114,6 @@ public:
       _head->_next = cpHead->_next;
       cpHead->_next->_prev = _head;
       delete cpHead;
-
-      if (_head->_prev == _head->_next) _isSorted = true;
    }
    void pop_back() {
       DListNode<T>* cpTail = _head->_prev;
@@ -123,8 +121,6 @@ public:
       _head->_prev = cpTail->_prev;
       cpTail->_prev->_next = _head;
       delete cpTail;
-
-      if (_head->_prev == _head->_next) _isSorted = true;
    }
 
    // return false if nothing to erase
@@ -134,8 +130,6 @@ public:
       delNode->_next->_prev = delNode->_prev;
       delNode->_prev->_next = delNode->_next;
       delete delNode;
-
-      if (_head->_prev == _head->_next) _isSorted = true;
       return true;
    }
    bool erase(const T& x) {
@@ -144,8 +138,6 @@ public:
             i->_next->_prev = i->_prev;
             i->_prev->_next = i->_next;
             delete i;
-
-            if (_head->_prev == _head->_next) _isSorted = true;
             return true;
          }
       }
@@ -161,6 +153,7 @@ public:
    void sort() const {
       if (_isSorted) return;
       size_t arrSize = size(), j = 0;
+      if (arrSize < 2) return;
       DListNode<T>** tmpArr = new DListNode<T>* [arrSize];
       for (DListNode<T>* i = _head->_next; i != _head; i = i->_next, ++j) tmpArr[j] = i;
 
