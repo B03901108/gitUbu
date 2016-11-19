@@ -101,13 +101,12 @@ public:
 
    void push_back(const T& x) {
       DListNode<T>* newNode = new DListNode<T>(T(x));
-      DListNode<T>* D;
-      D = newNode->_prev = _head->_prev;
+      newNode->_prev = _head->_prev;
       newNode->_next = _head;
-      D->_next = newNode;
+      _head->_prev->_next = newNode;
       _head->_prev = newNode;
 
-      if ((D != _head) && (x < D->_data)) _isSorted = false;
+      _isSorted = false;
    }
    void pop_front() {
       DListNode<T>* cpHead = _head->_next;
@@ -141,7 +140,6 @@ public:
             delete i;
             return true;
          }
-         if ((_isSorted) && (i->_data > x)) return false;
       }
       return false;
    }

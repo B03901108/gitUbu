@@ -92,7 +92,8 @@ public:
    }
    void pop_front() {
       if (_size == 0) return;
-      if (*_data != _data[(--_size)]) *_data = _data[_size];
+      if ((--_size) == 0) return;
+      *_data = _data[_size];
    }
    void pop_back() { if (_size > 0) --_size; }
 
