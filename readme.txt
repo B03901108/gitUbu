@@ -1,6 +1,6 @@
      Hello, welcome to my git repository. This sub-directory
 is a test about git on Ubuntu OS. There are some files here,
-most of whom are .txt files containing greeting message and 
+most of which are .txt files containing greeting message and 
 .cpp/.h files containing simple code segments in C++.
 
      All the files in "gitUbu" is available to everyone, so 
