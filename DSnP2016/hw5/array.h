@@ -90,8 +90,12 @@ public:
       _data[_size] = x;
       ++_size;
    }
-   void pop_front() { *_data = _data[(--_size)]; }
-   void pop_back() { --_size; }
+   void pop_front() {
+      if (_size == 0) return;
+      if ((--_size) == 0) return;
+      *_data = _data[_size];
+   }
+   void pop_back() { if (_size > 0) --_size; }
 
    bool erase(iterator pos) {
       if (_size == 0) return false;
