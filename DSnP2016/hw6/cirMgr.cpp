@@ -154,7 +154,7 @@ CirMgr::readCircuit(const string& fileName)
    lineNo = 0;
    int tmpNum;
    unsigned upbLine;
-   CirGate* dummyPtr;
+   CirGate** g;
    ifstream FILE(fileName.c_str());
 
    getline(FILE, errMsg, ' ');
@@ -168,14 +168,14 @@ CirMgr::readCircuit(const string& fileName)
    ++lineNo;
    upbLine = param[0] + param[2] + 1;
    PIList = new unsigned[param[1]];
-   CirGate::gateArr = new CirGate* [upbLine];
-   while (upbLine > 0) CirGate::gateArr[(--upbLine)] = NULL;
+   g = CirGate::gateArr = new CirGate* [upbLine];
+   while (upbLine > 0) g[(--upbLine)] = NULL;
 
    upbLine = param[1];
    for (; lineNo <= upbLine; ++lineNo) {
       getline(FILE, errMsg);
       myStr2Int(errMsg, tmpNum);
-      dummyPtr = new CirPiGate(lineNo + 1, (unsigned)tmpNum);
+      new CirPiGate(lineNo + 1, (unsigned)tmpNum);
       PIList[lineNo - 1] = (unsigned)(tmpNum / 2);
    }
 
@@ -183,7 +183,7 @@ CirMgr::readCircuit(const string& fileName)
    for (unsigned tmpid = param[0] + 1; lineNo <= upbLine; ++lineNo, ++tmpid) {
       getline(FILE, errMsg);
       myStr2Int(errMsg, tmpNum);
-      dummyPtr = new CirPoGate(lineNo + 1, tmpid, (unsigned)tmpNum);
+      new CirPoGate(lineNo + 1, tmpid, (unsigned)tmpNum);
    }
 
    upbLine += param[3];
@@ -191,22 +191,34 @@ CirMgr::readCircuit(const string& fileName)
       getline(FILE, errMsg, ' '); myStr2Int(errMsg, tmpNum);
       getline(FILE, errMsg, ' '); myStr2Int(errMsg, i);
       getline(FILE, errMsg); myStr2Int(errMsg, j);
-      dummyPtr = new CirAigGate(lineNo + 1, (unsigned)tmpNum, (unsigned)i, (unsigned)j);
+      new CirAigGate(lineNo + 1, (unsigned)tmpNum, (unsigned)i, (unsigned)j);
    }
    while (getline(FILE, errMsg, ' ') && (errMsg.length() > 1)) {
       myStr2Int(errMsg.substr(1), tmpNum);
       if (errMsg[0] == 'o') {
          getline(FILE, errMsg);
-         CirGate::gateArr[param[0] + ((unsigned)tmpNum) + 1]->symbol = errMsg;
+         g[param[0] + ((unsigned)tmpNum) + 1]->symbol = errMsg;
       } else if (errMsg[0] == 'i') {
          getline(FILE, errMsg);
-         CirGate::gateArr[PIList[tmpNum]]->symbol = errMsg;
+         g[PIList[tmpNum]]->symbol = errMsg;
       }
    }
 
-   dummyPtr = new CirConstGate();
+   new CirConstGate();
    upbLine = param[0] + param[2] + 1;
-   for ()
+   for (unsigned i = 1, j; i < upbLine; ++i) if (g[i]) {
+      errMsg = g[i]->getTypeStr();
+      if (errMsg == "AIG") lineNo = 3;
+      else if (errMsg == "PO") lineNo = 2;
+      else continue;
+      for (colNo = 1; colNo < lineNo; ++colNo) {
+         j = g[i]->fanin[colNo];
+         if (!g[(j / 2)]) { g[(j / 2)] = new CirUndefGate(j / 2); floatList.push_back(i); }
+         else if (g[(j / 2)]->getTypeStr() == "UNDEF") floatList.push_back(i);
+         g[(j / 2)]->fanout.push_back(2 * i + (j % 2));
+      }
+   }
+   for (upbLine -= (param[2] + 1); upbLine > 0; --upbLine) unusedList.push_back(upbLine);
    return true;
 }
 
@@ -223,8 +235,24 @@ Circuit Statistics
   Total      162
 *********************/
 void
-CirMgr::printSummary() const
-{
+CirMgr::printSummary() const {
+   cout << "\nCircuit Statistics\n";
+   for (char i = 0; i < 18; ++i) cout << '=';
+   cout << "\n  ";
+   cout << left << setw(7) << "PI";
+   cout << right << setw(7) << param[1];
+   cout << "\n  ";
+   cout << left << setw(7) << "PO";
+   cout << right << setw(7) << param[2];
+   cout << "\n  ";
+   cout << left << setw(7) << "AIG";
+   cout << right << setw(7) << param[3];
+   cout << endl;
+   for (char i = 0; i < 18; ++i) cout << '-';
+   cout << "\n  ";
+   cout << left << setw(7) << "Total";
+   cout << right << setw(7) << (param[1] + param[2] + param[3]);
+   cout << endl;
 }
 
 void
@@ -236,6 +264,7 @@ void
 CirMgr::printPIs() const
 {
    cout << "PIs of the circuit:";
+   for (unsigned i = 0, j = param[1]; i < j; ++i) cout << ' ' << PIList[i];
    cout << endl;
 }
 
@@ -243,6 +272,7 @@ void
 CirMgr::printPOs() const
 {
    cout << "POs of the circuit:";
+   for (unsigned i = param[0] + 1, j = param[2]; j > 0; ++i, --j) cout << ' ' << i;
    cout << endl;
 }
 

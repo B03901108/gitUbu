@@ -44,6 +44,7 @@ public:
 
 private:
    vector<unsigned> floatList;
+   vector<unsigned> unusedList;
    unsigned* PIList;
    unsigned param[4];
 };
