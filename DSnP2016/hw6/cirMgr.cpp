@@ -160,7 +160,8 @@ CirMgr::readCircuit(const string& fileName)
    getline(FILE, errMsg, ' ');
    if (errMsg != "aag") return parseError(ILLEGAL_IDENTIFIER);
    for (size_t i = 0, j = 0; i < 5; ++i) {
-      getline(FILE, errMsg, ' ');
+      if (i == 4) getline(FILE, errMsg);
+      else getline(FILE, errMsg, ' ');
       myStr2Int(errMsg, tmpNum);
       if (i != 2) { param[(j++)] = (unsigned)tmpNum; }
    }
@@ -183,7 +184,7 @@ CirMgr::readCircuit(const string& fileName)
    for (unsigned tmpid = param[0] + 1; lineNo <= upbLine; ++lineNo, ++tmpid) {
       getline(FILE, errMsg);
       myStr2Int(errMsg, tmpNum);
-      new CirPoGate(lineNo + 1, tmpid, (unsigned)tmpNum);
+      new CirPoGate(lineNo + 1, tmpid * 2, (unsigned)tmpNum);
    }
 
    upbLine += param[3];
@@ -193,15 +194,12 @@ CirMgr::readCircuit(const string& fileName)
       getline(FILE, errMsg); myStr2Int(errMsg, j);
       new CirAigGate(lineNo + 1, (unsigned)tmpNum, (unsigned)i, (unsigned)j);
    }
-   while (getline(FILE, errMsg, ' ') && (errMsg.length() > 1)) {
-      myStr2Int(errMsg.substr(1), tmpNum);
-      if (errMsg[0] == 'o') {
-         getline(FILE, errMsg);
-         g[param[0] + ((unsigned)tmpNum) + 1]->symbol = errMsg;
-      } else if (errMsg[0] == 'i') {
-         getline(FILE, errMsg);
-         g[PIList[tmpNum]]->symbol = errMsg;
-      }
+
+   while ((getline(FILE, errMsg)) && (errMsg.length() > 1)) {
+      upbLine = errMsg.find(' ');
+      myStr2Int(errMsg.substr(1, upbLine - 1), tmpNum);
+      if (errMsg[0] == 'o') g[param[0] + ((unsigned)tmpNum) + 1]->symbol = errMsg.substr(upbLine + 1);
+      else if (errMsg[0] == 'i') g[PIList[tmpNum]]->symbol = errMsg.substr(upbLine + 1);
    }
 
    new CirConstGate();
@@ -213,12 +211,13 @@ CirMgr::readCircuit(const string& fileName)
       else continue;
       for (colNo = 1; colNo < lineNo; ++colNo) {
          j = g[i]->fanin[colNo];
-         if (!g[(j / 2)]) { g[(j / 2)] = new CirUndefGate(j / 2); floatList.push_back(i); }
+         if (!g[(j / 2)]) { g[(j / 2)] = new CirUndefGate((j / 2) * 2); floatList.push_back(i); }
          else if (g[(j / 2)]->getTypeStr() == "UNDEF") floatList.push_back(i);
          g[(j / 2)]->fanout.push_back(2 * i + (j % 2));
       }
    }
-   for (upbLine -= (param[2] + 1); upbLine > 0; --upbLine) unusedList.push_back(upbLine);
+   for (upbLine = param[0]; upbLine > 0; --upbLine)
+      if ((g[upbLine]) && (g[upbLine]->fanout.size() == 0)) unusedList.push_back(upbLine);
    return true;
 }
 
@@ -256,29 +255,39 @@ CirMgr::printSummary() const {
 }
 
 void
-CirMgr::printNetlist() const
-{
+CirMgr::printNetlist() const {
 }
 
 void
-CirMgr::printPIs() const
-{
+CirMgr::printPIs() const {
    cout << "PIs of the circuit:";
    for (unsigned i = 0, j = param[1]; i < j; ++i) cout << ' ' << PIList[i];
    cout << endl;
 }
 
 void
-CirMgr::printPOs() const
-{
+CirMgr::printPOs() const {
    cout << "POs of the circuit:";
    for (unsigned i = param[0] + 1, j = param[2]; j > 0; ++i, --j) cout << ' ' << i;
    cout << endl;
 }
 
 void
-CirMgr::printFloatGates() const
-{
+CirMgr::printFloatGates() const {
+   size_t x = floatList.size();
+   if (x > 0) {
+      cout << "Gates with floating fanin(s):";
+      cout << ' ' << floatList[0];
+      for (size_t i = 1; i < x; ++i)
+         if (floatList[i] != floatList[i - 1]) cout << ' ' << floatList[i];
+      cout << endl;
+   }
+   x = unusedList.size();
+   if (x > 0) {
+      cout << "Gates defined but not used  :";
+      for (; x > 0; --x) cout << ' ' << unusedList[x - 1];
+      cout << endl;
+   }
 }
 
 void
