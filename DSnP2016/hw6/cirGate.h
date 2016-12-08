@@ -39,8 +39,8 @@ public:
    // Printing functions
    //virtual void printGate() const = 0;
    void reportGate() const;
-   void reportFanin(int level) const;
-   void reportFanout(int level) const;
+   void reportFanin(int level);
+   void reportFanout(int level);
 
    static CirGate** gateArr;
    static vector<unsigned> flipped;
@@ -49,6 +49,9 @@ public:
    vector<unsigned> fanout;
    unsigned* fanin;
    unsigned lineNo;
+
+   void dfsIn(int, int, char = '\0');
+   void dfsOut(int, int, char = '\0');
 };
 
 class CirPiGate :public CirGate {

@@ -25,24 +25,26 @@ class CirMgr
 {
 public:
    CirMgr():PIList(NULL) { for (unsigned i = 0; i < 4; ++i) param[i] = 0; }
-   ~CirMgr() {}
+   ~CirMgr();
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.
-   CirGate* getGate(unsigned gid) const { return 0; }
+   CirGate* getGate(unsigned) const;
 
    // Member functions about circuit construction
    bool readCircuit(const string&);
 
    // Member functions about circuit reporting
    void printSummary() const;
-   void printNetlist() const;
+   void printNetlist();
    void printPIs() const;
    void printPOs() const;
    void printFloatGates() const;
-   void writeAag(ostream&) const;
+   void writeAag(ostream&);
 
 private:
+   bool netList(unsigned, unsigned&);
+   void writeList(unsigned, vector<unsigned>&);
    vector<unsigned> floatList;
    vector<unsigned> unusedList;
    unsigned* PIList;
