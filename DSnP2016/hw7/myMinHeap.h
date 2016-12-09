@@ -31,7 +31,7 @@ public:
    // _TD_
    const Data& min() const { return _data[0]; }
    void updateMin() {
-      size_t i = 0, newSize = (_data.size() - 1), tmpId;
+      size_t i = 0, newSize = _data.size(), tmpId;
       while (2 * i + 1 < newSize) {
       	 tmpId = (i + 1) * 2;
       	 if ((tmpId == newSize) || (_data[tmpId - 1] < _data[tmpId])) --tmpId;

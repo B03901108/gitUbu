@@ -47,7 +47,12 @@ public:
    {
       friend class HashSet<Data>;
    public:
-      iterator(vector<Data>* V, size_t c = 0) :nowVec(V), cursor(c) {}
+      iterator(vector<Data>* V, size_t c, vector<Data>* U, vector<Data>* L) {
+         nowVec = V;
+         upb = U;
+         lwb = L;
+         cursor = c;
+      }
       iterator(const iterator& i) :nowVec(i.nowVec), cursor(i.cursor) {}
       ~iterator() {}
 
@@ -55,14 +60,19 @@ public:
       Data& operator * () { return (*nowVec)[cursor]; }
       iterator& operator ++ () {
          if ((++cursor) < nowVec->size()) return *this;
-         ++nowVec; cursor = 0; return *this;
+         cursor = 0;
+         do { ++nowVec; } while ((nowVec != upb) && (nowVec->size() == 0));
+         return *this;
       }
       iterator operator ++ (int) {
          iterator tmpIt(nowVec, cursor);
-         if ((++cursor) >= nowVec->size()) { ++nowVec; cursor = 0; }
+         if ((++cursor) >= nowVec->size()) {
+            cursor = 0;
+            do { ++nowVec; } while ((nowVec != upb) && (nowVec->size() == 0));
+         }
          return tmpIt;
       }
-      iterator& operator -- () {
+      /* iterator& operator -- () {
          if (cursor != 0) --cursor;
          else { --nowVec; cursor = nowVec->size() - 1; }
          return *this;
@@ -72,7 +82,7 @@ public:
          if (cursor != 0) --cursor;
          else { --nowVec; cursor = nowVec->size() - 1; }
          return tmpIt;
-      }
+      } */
 
       iterator& operator = (const iterator& i) {
          nowVec = i.nowVec;
@@ -93,6 +103,8 @@ public:
 
    private:
       vector<Data>* nowVec;
+      vector<Data>* upb;
+      vector<Data>* lwb;
       size_t cursor;
    };
 
@@ -112,9 +124,21 @@ public:
    // _TD_: implement these functions
    //
    // Point to the first valid data
-   iterator begin() const { return iterator(_buckets); }
+   iterator begin() const {
+      vector<Data>* V = _buckets;
+      vector<Data>* W = _buckets + (_numBuckets - 1);
+      for (size_t i = _numBuckets; i > 0; --i, ++V) if (V->size() != 0) break;
+      for (size_t i = _numBuckets; i > 0; --i, --W) if (W->size() != 0) break;
+      return iterator(V, 0, (++W), V);
+   }
    // Pass the end
-   iterator end() const { return iterator(_buckets + _numBuckets); }
+   iterator end() const {
+      vector<Data>* V = _buckets;
+      vector<Data>* W = _buckets + (_numBuckets - 1);
+      for (size_t i = _numBuckets; i > 0; --i, ++V) if (V->size() != 0) break;
+      for (size_t i = _numBuckets; i > 0; --i, --W) if (W->size() != 0) break;
+      return iterator((++W), 0, W, V);
+   }
    // return true if no valid data
    bool empty() const {
       for (size_t i = 0 ; i < _numBuckets; ++i) if (_buckets[i]->size()) return false;

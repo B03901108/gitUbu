@@ -104,6 +104,7 @@ TaskMgr::add(const string& s, size_t l)
    TaskNode target(s, l);
    if (!_taskHash.insert(target)) return false;
    _taskHeap.insert(target);
+   cout << "Task node inserted: (" << s << ", " << l << ')' << endl;
    return true;
 }
 
