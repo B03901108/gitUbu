@@ -34,7 +34,7 @@ public:
    HashSet(size_t b = 0) : _numBuckets(0), _buckets(0) { if (b != 0) init(b); }
    ~HashSet() { reset(); }
 
-   // TODO: implement the HashSet<Data>::iterator
+   // _TD_: implement the HashSet<Data>::iterator
    // o An iterator should be able to go through all the valid Data
    //   in the Hash
    // o Functions to be implemented:
@@ -109,7 +109,7 @@ public:
    vector<Data>& operator [] (size_t i) { return _buckets[i]; }
    const vector<Data>& operator [](size_t i) const { return _buckets[i]; }
 
-   // TODO: implement these functions
+   // _TD_: implement these functions
    //
    // Point to the first valid data
    iterator begin() const { return iterator(_buckets); }
@@ -130,25 +130,53 @@ public:
    // check if d is in the hash...
    // if yes, return true;
    // else return false;
-   bool check(const Data& d) const { return false; }
+   bool check(const Data& d) const {
+      vector<Data>* nowVec = _buckets + bucketNum(d);
+      for (size_t i = 0, x = nowVec->size(); i < x; ++i) if ((*nowVec)[i] == d) return true;
+      return false;
+   }
 
    // query if d is in the hash...
    // if yes, replace d with the data in the hash and return true;
    // else return false;
-   bool query(Data& d) const { return false; }
+   bool query(Data& d) const {
+      vector<Data>* nowVec = _buckets + bucketNum(d);
+      for (size_t i = 0, x = nowVec->size(); i < x; ++i)
+         if ((*nowVec)[i] == d) { d = (*nowVec)[i]; return true; }
+      return false;
+   }
 
    // update the entry in hash that is equal to d (i.e. == return true)
    // if found, update that entry with d and return true;
    // else insert d into hash as a new entry and return false;
-   bool update(const Data& d) { return false; }
+   bool update(const Data& d) {
+      vector<Data>* nowVec = _buckets + bucketNum(d);
+      for (size_t i = 0, x = nowVec->size(); i < x; ++i)
+         if ((*nowVec)[i] == d) { (*nowVec)[i] = d; return true; }
+      nowVec->push_back(d);
+      return false;
+   }
 
    // return true if inserted successfully (i.e. d is not in the hash)
    // return false is d is already in the hash ==> will not insert
-   bool insert(const Data& d) { return true; }
+   bool insert(const Data& d) {
+      vector<Data>* nowVec = _buckets + bucketNum(d);
+      for (size_t i = 0, x = nowVec->size(); i < x; ++i) if ((*nowVec)[i] == d) return false;
+      nowVec->push_back(d);
+      return true;
+   }
 
    // return true if removed successfully (i.e. d is in the hash)
    // return fasle otherwise (i.e. nothing is removed)
-   bool remove(const Data& d) { return false; }
+   bool remove(const Data& d) {
+      vector<Data>* nowVec = _buckets + bucketNum(d);
+      for (size_t i = 0, x = nowVec->size(); i < x; ++i) if ((*nowVec)[i] == d) {
+         if (i != x - 1) (*nowVec)[i] = (*nowVec)[x - 1];
+         nowVec->pop_back();
+         return true;
+      }
+      return false;
+   }
 
 private:
    // Do not add any extra data member

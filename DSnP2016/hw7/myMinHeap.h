@@ -28,8 +28,17 @@ public:
 
    size_t size() const { return _data.size(); }
 
-   // TODO
+   // _TD_
    const Data& min() const { return _data[0]; }
+   void updateMin() {
+      size_t i = 0, newSize = (_data.size() - 1), tmpId;
+      while (2 * i + 1 < newSize) {
+      	 tmpId = (i + 1) * 2;
+      	 if ((tmpId == newSize) || (_data[tmpId - 1] < _data[tmpId])) --tmpId;
+         if (_data[tmpId] < _data[i]) { swap(i, tmpId); i = tmpId; }
+         else break;
+      }
+   }
    void insert(const Data& d) {
       size_t index= _data.size(), tmpId;
       _data.push_back(d);
