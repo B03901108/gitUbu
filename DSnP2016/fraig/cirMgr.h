@@ -62,6 +62,7 @@ public:
 private:
    bool netList(unsigned, unsigned&);
    void writeList(unsigned, vector<unsigned>&);
+   void aigRemove(unsigned, unsigned); //aigId, faninLiteral
    vector<unsigned> floatList;
    vector<unsigned> unusedList;
    ofstream* _simLog;
