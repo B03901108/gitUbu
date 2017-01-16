@@ -15,7 +15,8 @@ using namespace std;
 
 // TODO: Please keep "CirMgr::sweep()" and "CirMgr::optimize()" for cir cmd.
 //       Feel free to define your own variables or functions
-CirGate* gArr(unsigned int index) {
+CirGate*
+CirMgr::gArr(unsigned index) {
    CirGate* recovered = CirGate::gateArr[index];
    if (((size_t)recovered) % 2) recovered = (CirGate*)(((size_t)recovered) - 1);
    return recovered;

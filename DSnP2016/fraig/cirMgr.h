@@ -60,9 +60,13 @@ public:
    void writeGate(ostream&, CirGate*) const;
 
 private:
+   CirGate* gArr(unsigned);
    bool netList(unsigned, unsigned&);
    void writeList(unsigned, vector<unsigned>&);
    void aigRemove(unsigned, unsigned); //aigId, faninLiteral
+   bool fallInHole(unsigned);
+   void aigMerge(unsigned, unsigned); // dominant, replaced
+
    vector<unsigned> floatList;
    vector<unsigned> unusedList;
    ofstream* _simLog;
