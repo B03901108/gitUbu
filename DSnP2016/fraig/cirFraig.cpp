@@ -53,9 +53,36 @@ vector<unsigned>* _holes;
 // _unusedList and _undefList won't be changed
 void
 CirMgr::aigMerge(unsigned domin, unsigned repla) {
+   unsigned i, x, j;
+   CirGate* hh;
+   CirGate** g = CirGate::gateArr;
+   CirGate* gg = g[repla];
+   CirGate* ff = g[domin];
 
-delete g[repla];
-g[repla] = NULL;
+   for (i = 0, x = gg->fanout.size(); i < x; ++i) {
+      j = gg->fanout[i];
+      hh = g[j / 2];
+      if ((hh->fanin[1] / 2 == repla) && (j % 2 == hh->fanin[1] % 2)) {
+         hh->fanin[1] = domin * 2 + (j % 2);
+         ff->fanout.push_back(j);
+      } else {
+         hh->fanin[2] = domin * 2 + (j % 2);
+         ff->fanout.push_back(j);
+      }
+   }
+   
+   x = ((gg->fanin[1] / 2 == gg->fanin[2] / 2) ?(2) :(3));
+   for (i = 1; i < x; ++i) {
+      hh = g[gg->fanin[i] / 2];
+      for (j = 0; j < hh->fanout.size(); ) {
+         if (hh->fanout[j] / 2 != repla) { ++j; continue; }
+         if (j != hh->fanout.size() - 1) hh->fanout[j] = hh->fanout.back();
+         hh->fanout.pop_back();
+      }
+   }
+
+   delete g[repla];
+   g[repla] = NULL;
 }
 
 bool
@@ -69,13 +96,8 @@ CirMgr::fallInHole(unsigned aigVar) {
    firIn = g[aigVar]->fanin[1]; secIn = g[aigVar]->fanin[2];
    for (i = 0, x = _holes[holeNo].size(); i < x; ++i) {
       j = _holes[holeNo][i];
-      if ((g[j]->fanin[1] == firIn) && (g[j]->fanin[2] == secIn)) {
-         aigMerge(j, aigVar);
-         return false;
-      }
-      if ((g[j]->fanin[2] == firIn) && (g[j]->fanin[1] == secIn)) {
-         g[aigVar]->fanin[1] = g[j]->fanin[1];
-         g[aigVar]->fanin[2] = g[j]->fanin[2];
+      if (((g[j]->fanin[1] == firIn) && (g[j]->fanin[2] == secIn)) ||
+         ((g[j]->fanin[2] == firIn) && (g[j]->fanin[1] == secIn))) {
          aigMerge(j, aigVar);
          return false;
       }
@@ -121,7 +143,7 @@ CirMgr::strash() {
          g[j] = gArr(j);
       } else {
          for (size_t k = 1; k < 3; ++k) { j = gg->fanin[k] / 2; g[j] = gArr(j); }
-         if (g[floatList[i]] % 2) { estimate.push_back(floatList[i]); g[floatList[i]] = gg; }
+         if (((size_t)g[floatList[i]]) % 2) { estimate.push_back(floatList[i]); g[floatList[i]] = gg; }
       }
    }
 
