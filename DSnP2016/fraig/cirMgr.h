@@ -25,7 +25,7 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr():PIList(NULL) { for (unsigned i = 0; i < 4; ++i) param[i] = 0; }
+   CirMgr():PIList(NULL), hasBeenSim(false) { for (unsigned i = 0; i < 4; ++i) param[i] = 0; }
    ~CirMgr();
 
    // Access functions
@@ -63,15 +63,21 @@ private:
    CirGate* gArr(unsigned);
    bool netList(unsigned, unsigned&);
    void writeList(unsigned, vector<unsigned>&);
+
    void aigRemove(unsigned, unsigned); //aigId, faninLiteral
+   unsigned getHashSize(unsigned);
    bool fallInHole(unsigned);
    void aigMerge(unsigned, unsigned); // dominant, replaced
+
+   void bitSim(unsigned);
+   bool FECGHash(unsigned, vector< vector<unsigned> >&);
 
    vector<unsigned> floatList;
    vector<unsigned> unusedList;
    ofstream* _simLog;
    unsigned* PIList;
    unsigned param[4];
+   bool hasBeenSim;
 };
 
 #endif // CIR_MGR_H

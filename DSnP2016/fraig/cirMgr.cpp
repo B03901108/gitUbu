@@ -151,6 +151,9 @@ parseError(CirParseError err)
 /**************************************************************/
 CirMgr::~CirMgr() {
    if (PIList) delete [] PIList;
+   CirGate::flipped.clear();
+   CirGate::FECGSet.clear();
+   if (CirGate::bitList) { delete [] CirGate::bitList; CirGate::bitList = NULL; }
    unsigned x = param[2] + param[0] + 1;
    CirGate** g = CirGate::gateArr;
    if (g) {
@@ -171,6 +174,7 @@ CirMgr::readCircuit(const string& fileName) {
    int tmpNum;
    unsigned upbLine;
    CirGate** g;
+   unsigned* bl;
    vector<unsigned> tmpFL;
    ifstream FILE(fileName.c_str());
    if (!FILE.is_open()) {
@@ -190,6 +194,8 @@ CirMgr::readCircuit(const string& fileName) {
    ++lineNo;
    upbLine = param[0] + param[2] + 1;
    PIList = new unsigned[param[1]];
+   bl = CirGate::bitList = new unsigned[upbLine];
+   for (unsigned i = 0; i < upbLine; ++i) bl[i] = 0;
    g = CirGate::gateArr = new CirGate* [upbLine];
    while (upbLine > 0) g[(--upbLine)] = NULL;
 
@@ -361,8 +367,16 @@ CirMgr::printFloatGates() const {
 }
 
 void
-CirMgr::printFECPairs() const
-{
+CirMgr::printFECPairs() const {
+   for (size_t i = 0, x = CirGate::FECGSet.size(); i < x; ++i) {
+      cout << '[' << i << ']';
+      for (size_t j = 0, y = CirGate::FECGSet[i].size(); j < y; ++j) {
+         cout << ' ';
+         if (CirGate::FECGSet[i][j] % 2) cout << '!';
+         cout << (CirGate::FECGSet[i][j] / 2);
+      }
+      cout << endl;
+   }
 }
 
 void

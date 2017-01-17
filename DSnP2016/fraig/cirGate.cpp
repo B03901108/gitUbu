@@ -34,7 +34,9 @@ extern CirMgr *cirMgr;
 /*   class CirGate member functions   */
 /**************************************/
 CirGate** CirGate::gateArr = NULL;
+unsigned* CirGate::bitList = NULL;
 vector<unsigned> CirGate::flipped = vector<unsigned>();
+vector< vector<unsigned> > CirGate::FECGSet = vector< vector<unsigned> >();
 
 void
 CirGate::reportGate() const {

@@ -166,7 +166,7 @@ CirMgr::optimize() {
          (g[g[i]->fanin[2] / 2]->getTypeStr() == "UNDEF"))) floatList.push_back(i);
       if (!g[i]->fanout.size()) unusedList.push_back(i);
    }
-   for (; y < x; ++y) if (g[g[i]->fanin[1] / 2]->getTypeStr() == "UNDEF") floatList.push_back(i);
+   for (; y < x; ++y) if (g[g[y]->fanin[1] / 2]->getTypeStr() == "UNDEF") floatList.push_back(y);
    for (i = 0, x = unusedList.size() / 2, y = unusedList.size() - 1; i < x; ++i) {
       unusedList[i] = unusedList[i] + unusedList[y - i];
       unusedList[y - i] = unusedList[i] - unusedList[y - i];

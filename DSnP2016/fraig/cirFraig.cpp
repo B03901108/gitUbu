@@ -17,25 +17,7 @@ using namespace std;
 
 // TODO: Please keep "CirMgr::strash()" and "CirMgr::fraig()" for cir cmd.
 //       Feel free to define your own variables or functions
-unsigned getHashSize(unsigned s) {
-   if (s < 8) return 7;
-   if (s < 16) return 13;
-   if (s < 32) return 31;
-   if (s < 64) return 61;
-   if (s < 128) return 127;
-   if (s < 512) return 509;
-   if (s < 2048) return 1499;
-   if (s < 8192) return 4999;
-   if (s < 32768) return 13999;
-   if (s < 131072) return 59999;
-   if (s < 524288) return 100019;
-   if (s < 2097152) return 300007;
-   if (s < 8388608) return 900001;
-   if (s < 33554432) return 1000003;
-   if (s < 134217728) return 3000017;
-   if (s < 536870912) return 5000011;
-   return 7000003;
-}
+
 /*******************************/
 /*   Global variable and enum  */
 /*******************************/
@@ -85,12 +67,33 @@ CirMgr::aigMerge(unsigned domin, unsigned repla) {
    g[repla] = NULL;
 }
 
+unsigned
+CirMgr::getHashSize(unsigned s) {
+   if (s < 8) return 7;
+   if (s < 16) return 13;
+   if (s < 32) return 31;
+   if (s < 64) return 61;
+   if (s < 128) return 127;
+   if (s < 512) return 509;
+   if (s < 2048) return 1499;
+   if (s < 8192) return 4999;
+   if (s < 32768) return 13999;
+   if (s < 131072) return 59999;
+   if (s < 524288) return 100019;
+   if (s < 2097152) return 300007;
+   if (s < 8388608) return 900001;
+   if (s < 33554432) return 1000003;
+   if (s < 134217728) return 3000017;
+   if (s < 536870912) return 5000011;
+   return 7000003;
+}
+
 bool
 CirMgr::fallInHole(unsigned aigVar) {
    unsigned i, j, x;
    CirGate** g = CirGate::gateArr;
-   unsigned firIn = g[aigVar]->fanin[1] % 1000;
-   unsigned secIn = g[aigVar]->fanin[2] % 1000;
+   unsigned firIn = g[aigVar]->fanin[1] % 1021;
+   unsigned secIn = g[aigVar]->fanin[2] % 1021;
    unsigned holeNo = ((firIn * firIn * firIn) + (secIn * secIn * secIn)) % numHole;
    
    firIn = g[aigVar]->fanin[1]; secIn = g[aigVar]->fanin[2];

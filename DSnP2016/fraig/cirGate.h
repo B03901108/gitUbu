@@ -26,7 +26,7 @@ class CirGate;
 //------------------------------------------------------------------------
 class CirGate {
 public:
-   CirGate(unsigned l, unsigned len, unsigned id) :lineNo(l) {
+   CirGate(unsigned l, unsigned len, unsigned id) :lineNo(l), FECNo(0) {
       fanin = new unsigned[len];
       fanin[0] = id;
       gateArr[id / 2] = this;
@@ -45,12 +45,15 @@ public:
    void reportFanout(int level);
 
    static CirGate** gateArr;
+   static unsigned* bitList;
    static vector<unsigned> flipped;
+   static vector< vector<unsigned> > FECGSet;
 
    string symbol;
    vector<unsigned> fanout;
    unsigned* fanin;
    unsigned lineNo;
+   unsigned FECNo;
 
    void dfsIn(int, int, char = '\0');
    void dfsOut(int, int, char = '\0');
