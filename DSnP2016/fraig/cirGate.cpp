@@ -40,27 +40,46 @@ vector< vector<unsigned> > CirGate::FECGSet = vector< vector<unsigned> >();
 
 void
 CirGate::reportGate() const {
-   unsigned intSored = bitList[fanin[0] / 2];
+   unsigned i, j, k, x, numPrinted;
    char bitStored[32];
-   for (char i = 32; i > 0; --i, intSored /= 2) bitStored[i - 1] = ('0' + (intSored % 2));
+   unsigned intSored = bitList[fanin[0] / 2];
+   for (i = 32; i > 0; --i, intSored /= 2) bitStored[i - 1] = ('0' + (intSored % 2));
 
-   char j = 12 + (char(getTypeStr().length())) + uIntLen(fanin[0] / 2) + uIntLen(lineNo);
+   j = 12 + getTypeStr().length() + uIntLen(fanin[0] / 2) + uIntLen(lineNo);
    if (symbol.length() != 0) j += (symbol.length() + 2);
-   for (char i = 0; i < 50; ++i) cout << '=';
+   for (i = 0; i < 50; ++i) cout << '=';
    cout << "\n= " << getTypeStr() << '(' << (fanin[0] / 2) << ')';
    if (symbol.length() != 0) cout << '\"' << symbol << '\"';
    cout << ", line " << lineNo;
    for (; j < 50; ++j) cout << ' '; cout << "=\n";
 
-   cout << "= FECs:"; cout << "=";
+   intSored = FECNo;
+   cout << "= FECs:";
+   if (!intSored) for (i = 0; i < 41; ++i) cout << ' ';
+   else {
+      j = (--intSored) % 2;
+      intSored  /= 2;
+      for (k = 0, x = FECGSet[intSored].size(), i = 0; k < x; ++k) {
+         numPrinted = FECGSet[intSored][k];
+         if (numPrinted / 2 != fanin[0] / 2) {
+            i += (1 + uIntLen(numPrinted / 2));
+            cout << ' ';
+            if ((numPrinted + j) % 2) { ++i; cout << '!'; }
+            cout << numPrinted / 2;
+         }
+      }
+      for (; i < 41; ++i) cout << ' ';
+   }
+   cout << " =";
 
    cout << "\n= Value: ";
-   for (char i = 0; i < 32; ++i) {
-       if ((i % 4 == 0) && (i != 0)) cout << '_';
+   cout << bitStored[0];
+   for (i = 1; i < 32; ++i) {
+       if (i % 4 == 0) cout << '_';
        cout << bitStored[i];
    }
    cout << " =\n";
-   for (char i = 0; i < 50; ++i) cout << '=';
+   for (i = 0; i < 50; ++i) cout << '=';
    cout << endl;
 }
 

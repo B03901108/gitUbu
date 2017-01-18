@@ -166,8 +166,15 @@ CirMgr::randomSim() {
 void
 CirMgr::fileSim(ifstream& patternFile) {
    unsigned i, x, j, y;
+   string patIn;
    vector<unsigned> dummyArr;
+   vector< vector<unsigned> > newFECG;
+   unsigned remainTime = 0;
+   size_t caseCount = 0;
+   unsigned* bl = CirGate::bitList;
+   unsigned* caseOut = new unsigned[param[2]];
    CirGate** g = CirGate::gateArr;
+
    if (!hasBeenSim) {
       CirGate::FECGSet.push_back(vector<unsigned>());
       CirGate::FECGSet[0].push_back(0);
@@ -179,23 +186,46 @@ CirMgr::fileSim(ifstream& patternFile) {
          g[i] = (CirGate*)(((size_t)g[i]) - 1);
          CirGate::flipped.pop_back();
       }
-      if (CirGate::FECGSet[0].size() < 2) { CirGate::FECGSet.clear(); return; }
+      if (CirGate::FECGSet[0].size() < 2) CirGate::FECGSet.clear();
    } else for (i = 0, x = CirGate::FECGSet.size(); i < x; ++i)
       for (j = 0, y = CirGate::FECGSet[i].size(); j < y; ++j) {
          CirGate::FECGSet[i][j] /= 2;
          g[CirGate::FECGSet[i][j]]->FECNo = 0;
       }
+   
+   dummyArr.clear(); remainTime = 0;
+   while (patternFile >> patIn) {
+      x = patIn.size();
+      if (x != param[1]) {
+         cout << "Error: Pattern(" << patIn << ") length(" << x
+            << ") does not match the number of inputs(" << param[1] << ") in a circuit!!" << endl;
+         dummyArr.clear();
+         caseCount = 0;
+         break;
+      }
+      for (i = 0; i < x; ++i) if ((patIn[i] != '0') && (patIn[i] != '1')) {
+         cout << "Error: Pattern(" << patIn << ") contains a non-0/1 character(\'"
+            << patIn[i] << "\')." << endl;
+         dummyArr.clear();
+         caseCount = 0;
+         remainTime = 1;
+         break;
+      }
+      if (remainTime) break;
+      
+      ++caseCount;
+      if (caseCount % 32 == 1) {
+         j = 1;
+         for (i = 0; i < x; ++i) dummyArr.push_back((unsigned)(patIn[i] - '0'));
+      } else {
+         j = j << 1;
+         for (i = 0; i < x; ++i) if (patIn[i] == '1') dummyArr[dummyArr.size() - x + i] += j;
+      }
 
-   vector< vector<unsigned> > newFECG;
-   unsigned remainTime = 0;
-   size_t caseCount = 0;
-   unsigned* bl = CirGate::bitList;
-   unsigned* caseIn = new unsigned[param[1]];
-   unsigned* caseOut = new unsigned[param[2]];
-   while ((CirGate::FECGSet.size()) && (remainTime < 5)) {
-      caseGen(caseIn, param[1]);
-      caseCount += 32;
-      for (i = 0, x = param[1]; i < x; ++i) bl[PIList[i]] = caseIn[i];
+   }
+
+   for (unsigned k = 0, z = dummyArr.size(), l = param[1]; k < z; k += l) {
+      for (i = 0; i < l; ++i) bl[PIList[i]] = dummyArr[k + i];
       for (i = param[0] + 1, x = i + param[2], j = 0; i < x; ++i, ++j) {
          bitSim(i);
          caseOut[j] = bl[i];
@@ -206,7 +236,7 @@ CirMgr::fileSim(ifstream& patternFile) {
          CirGate::flipped.pop_back();
       }
       if (_simLog) for (i = 0; i < 32; ++i) {
-         for (j = 0, y = param[1]; j < y; ++j) { (*_simLog) << (caseIn[j] % 2); caseIn[j] /= 2; }
+         for (j = 0; j < l; ++j) { (*_simLog) << (dummyArr[k + j] % 2); dummyArr[k + j] /= 2; }
          (*_simLog) << ' ';
          for (j = 0, y = param[2]; j < y; ++j) { (*_simLog) << (caseOut[j] % 2); caseOut[j] /= 2; }
          (*_simLog) << endl;
@@ -214,8 +244,7 @@ CirMgr::fileSim(ifstream& patternFile) {
 
       y = 0; //changeExist
       for (i = 0, x = CirGate::FECGSet.size(); i < x; ++i) if (FECGHash(i, newFECG)) ++y;
-      if (y) { remainTime = 0; CirGate::FECGSet.swap(newFECG); }
-      else ++remainTime;
+      if (y) CirGate::FECGSet.swap(newFECG);
       newFECG.clear();
    }
 
@@ -237,7 +266,6 @@ CirMgr::fileSim(ifstream& patternFile) {
 
    hasBeenSim = true;
    delete [] caseOut;
-   delete [] caseIn;
    cout << caseCount << " patterns simulated." << endl;
 }
 
