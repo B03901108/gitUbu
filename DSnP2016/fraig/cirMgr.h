@@ -57,7 +57,7 @@ public:
    void printFloatGates() const;
    void printFECPairs() const;
    void writeAag(ostream&);
-   void writeGate(ostream&, CirGate*) const;
+   void writeGate(ostream&, CirGate*);
 
 private:
    CirGate* gArr(unsigned);

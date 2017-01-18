@@ -435,7 +435,40 @@ CirMgr::writeAag(ostream& outfile) {
 }
 
 void
-CirMgr::writeGate(ostream& outfile, CirGate *g) const
-{
-}
+CirMgr::writeGate(ostream& outfile, CirGate* gg) {
+   unsigned i, j;
+   unsigned* tmpPtr;
+   string tmpStr;
+   vector<unsigned> aigOrdered, piOrdered;
+   unsigned x = param[1];
+   unsigned maxId = 0;
+   CirGate** g = CirGate::gateArr;
 
+   writeList(gg->fanin[0] / 2, aigOrdered);
+   for (i = 0, j = aigOrdered.size(); i < j; ++i) if (aigOrdered[i] > maxId) maxId = aigOrdered[i];
+   for (i = 0; i < x; ++i) {
+      j = PIList[i];
+      if (gArr(j) != g[j]) { piOrdered.push_back(j); piOrdered.push_back(i); if (j > maxId) maxId = j; }
+   }
+
+   while (CirGate::flipped.size()) {
+      g[CirGate::flipped.back()] = (CirGate*)(((size_t)g[CirGate::flipped.back()]) - 1);
+      CirGate::flipped.pop_back();
+   }
+
+   outfile << "aag " << maxId << ' ' << (piOrdered.size() / 2) << ' ' << 0;
+   outfile << ' ' << 1 << ' ' << aigOrdered.size() << endl;
+   for (i = 0, j = piOrdered.size(); i < j; i += 2) outfile << (piOrdered[i] * 2) << endl;
+   outfile << gg->fanin[0] << endl;
+   for (i = 0, j = aigOrdered.size(); i < j; ++i) {
+      tmpPtr = g[aigOrdered[i]]->fanin;
+      outfile << tmpPtr[0] << ' ' << tmpPtr[1] << ' ' << tmpPtr[2] << endl;
+   }
+   for (i = 0, j = piOrdered.size(); i < j; i += 2) {
+      tmpStr = g[piOrdered[i]]->symbol;
+      if (tmpStr.size() != 0) outfile << 'i' << piOrdered[i + 1] << ' ' << tmpStr << endl;
+   }
+   outfile << "o0 " << (gg->fanin[0] / 2) << endl;
+   outfile << 'c' << endl;
+   outfile << "AIG gate written by Wei-Lun Huang" << endl;
+}

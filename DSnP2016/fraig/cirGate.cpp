@@ -40,6 +40,10 @@ vector< vector<unsigned> > CirGate::FECGSet = vector< vector<unsigned> >();
 
 void
 CirGate::reportGate() const {
+   unsigned intSored = bitList[fanin[0] / 2];
+   char bitStored[32];
+   for (char i = 32; i > 0; --i, intSored /= 2) bitStored[i - 1] = ('0' + (intSored % 2));
+
    char j = 12 + (char(getTypeStr().length())) + uIntLen(fanin[0] / 2) + uIntLen(lineNo);
    if (symbol.length() != 0) j += (symbol.length() + 2);
    for (char i = 0; i < 50; ++i) cout << '=';
@@ -47,7 +51,17 @@ CirGate::reportGate() const {
    if (symbol.length() != 0) cout << '\"' << symbol << '\"';
    cout << ", line " << lineNo;
    for (; j < 50; ++j) cout << ' '; cout << "=\n";
+
+   cout << "= FECs:"; cout << "=";
+
+   cout << "\n= Value: ";
+   for (char i = 0; i < 32; ++i) {
+       if ((i % 4 == 0) && (i != 0)) cout << '_';
+       cout << bitStored[i];
+   }
+   cout << " =\n";
    for (char i = 0; i < 50; ++i) cout << '=';
+   cout << endl;
 }
 
 void
