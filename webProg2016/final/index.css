@@ -1,7 +1,7 @@
 .MessageBlock {
 	display: block;
+	margin: 0px 0px 4px 0px;
 	width: 584px;
-	background: azure;
 	border-radius: 10px;
 }
 
@@ -20,4 +20,46 @@
 	vertical-align: top;
 	margin: 4px 0px 4px 4px;
 	width: 512px;
+}
+
+.evenColor {
+	background: azure;
+}
+
+.oddColor {
+	background: #ffeee8;
+}
+
+.MessageBoard {
+	width: 584px;
+}
+
+.MessageBoard textarea {
+	display: block;
+	resize: none;
+	margin: 32px 0px 4px 0px;
+	width: 574px;
+	height: 150px;
+	border: 5px double black;
+	font: 16px serif;
+}
+
+.MessageBoard input {
+	vertical-align: top;
+	margin: 0px 4px 0px 0px;
+	width: 400px;
+	height: 24px;
+	font: 20px serif;
+}
+
+.MessageBoard > img {
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+}
+
+.nowTime {
+	margin: 0 auto;
+	text-align: center;
+	background-color: pink;
 }
