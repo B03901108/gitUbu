@@ -1,0 +1,23 @@
+.MessageBlock {
+	display: block;
+	width: 584px;
+	background: azure;
+	border-radius: 10px;
+}
+
+.MessageBlock:hover {
+	border: 2px dashed black;
+}
+
+.MessageBlock img {
+	margin: 4px 4px 4px 0px;
+	width: 64px;
+	height: 64px;
+}
+
+.MessageBody {
+	display: inline-block;
+	vertical-align: top;
+	margin: 4px 0px 4px 4px;
+	width: 512px;
+}
